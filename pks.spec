@@ -2,12 +2,17 @@ Summary:	PKS - public key server system
 Summary(pl):	PKS - serwer kluczy publicznych
 Name:		pks
 Version:	0.9.4
-Release:	3
+Release:	4
 License:	GPL
 Group:		Daemons
 Source0:	http://www.mit.edu/people/marc/pks/%{name}-%{version}.tar.gz
 Source1:	%{name}.init
+Source2:	pks_help.en
 Patch0:		%{name}-read_only.patch
+Patch1:		%{name}-ac25.patch
+Patch2:		http://www.mit.edu/people/marc/pks/pks094-patch2
+Patch3:		http://www.mit.edu/people/marc/pks/x509patch
+Patch4:		%{name}-noinstall-db2.patch
 URL:		http://www.mit.edu/people/marc/pks/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -28,6 +33,10 @@ zarz±dzania i udostêpniania bazy danych kluczy publicznych PGP.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p0
+%patch4 -p1
 
 %build
 cd db2-sleepycat/dist/
@@ -56,8 +65,7 @@ install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 rm -f $RPM_BUILD_ROOT/%{_bindir}/db_*
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/pks
-
-gzip -9nf README NEWS
+install %{SOURCE2} $RPM_BUILD_ROOT/%{_datadir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -72,7 +80,7 @@ grep -q pks /etc/passwd || (
 )
 
 %post
-[ -f /var/lib/pks/db/num_keydb ] || /usr/bin/pksclient /var/lib/pks/db create
+[ -f /var/lib/pks/db/num_keydb ] || su pks -c "/usr/bin/pksclient /var/lib/pks/db create >& /dev/null"
 
 if [ "$1" = "1" ]; then
 	/sbin/chkconfig --add pks
@@ -94,10 +102,11 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc *.gz pks-commands.html
+%doc README NEWS pks-commands.html
 %attr(755,root,root) %{_bindir}/*
 %attr(754,root,root) /etc/rc.d/init.d/pks
 %{_mandir}/man*/*
+%{_datadir}
 %attr(775,root,pks) %dir %{_localstatedir}
 %attr(775,root,pks) %dir %{_localstatedir}/db
 %attr(775,root,pks) %dir %{_localstatedir}/incoming
