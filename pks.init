@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# pks:       Starts the PGP Key Server
+#
+# Version:      @(#) /etc/rc.d/init.d/pks 1.0
+#
+# chkconfig: 345 90 10
+# description: Starts and stops the Public Key Server System at boot time and shutdown.
+#
+# processname: pksd
+# config: /etc/pksd.conf
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# See how we were called.
+case "$1" in
+  start)
+	msg_starting pksd
+	busy
+	su pks -c "pksd /etc/pksd.conf &"
+	deltext
+	ok
+	touch /var/lock/subsys/pks
+	;;
+  stop)
+	msg_stopping pksd
+	killproc pksd
+	rm -f /var/lock/subsys/pks
+	;;
+  status)
+	status pksd
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  *)
+	msg_Usage "$0 {start|stop|status|restart}"
+	exit 1
+	;;
+esac
+
+exit 0
+
