@@ -1,0 +1,40 @@
+diff -Nru pks-0.9.4.orig/db2-sleepycat/dist/configure.in pks-0.9.4/db2-sleepycat/dist/configure.in
+--- pks-0.9.4.orig/db2-sleepycat/dist/configure.in	Sun May 16 07:11:59 1999
++++ pks-0.9.4/db2-sleepycat/dist/configure.in	Fri Jun 14 12:05:02 2002
+@@ -93,7 +93,7 @@
+ 		CXXFLAGS="-fhandle-exceptions $CXXFLAGS"
+ 	fi
+ 
+-	LIBOBJS="$LIBOBJS \$(COBJS)"
++#	LIBOBJS="$LIBOBJS \$(COBJS)"
+ fi
+ 
+ dnl There are additional libraries we need for some compiler/architecture
+@@ -107,7 +107,7 @@
+ 	[db_cv_compat185="$enable_compat185"], [db_cv_compat185="no"])
+ AC_MSG_RESULT($db_cv_compat185)
+ if test "$db_cv_compat185" = "yes"; then
+-	LIBOBJS="db185.o $LIBOBJS"
++	AC_LIBOBJ(db185)
+ fi
+ 
+ dnl Optional utilities.
+@@ -182,7 +182,8 @@
+ 
+ dnl A/UX has a broken getopt(3).
+ case "$host_os" in
+-aux*)	LIBOBJS="getopt.o $LIBOBJS";;
++aux*)
++	AC_LIBOBJ(getopt);;
+ esac
+ 
+ dnl Checks for system functions for which we don't have replacements.
+@@ -472,7 +473,7 @@
+ 	AC_DEFINE(HAVE_ASSEM_UTS4_CC)
+ 	mutex_align="sizeof(int)"
+ 	spin_line1="typedef int tsl_t;"
+-	LIBOBJS="$LIBOBJS uts4.cc.o";;
++	AC_LIBOBJ(uts4.cc);;
+ x86/gcc)
+ 	AC_DEFINE(HAVE_ASSEM_X86_GCC)
+ 	mutex_align="1"
