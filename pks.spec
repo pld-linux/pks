@@ -17,14 +17,17 @@ Patch4:		%{name}-noinstall-db2.patch
 URL:		http://www.mit.edu/people/marc/pks/
 BuildRequires:	autoconf
 BuildRequires:	automake
+BuildRequires:	rpmbuild(macros) >= 1.159
 PreReq:		rc-scripts
-Requires(pre):	/usr/bin/getgid
 Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires(post,preun):	/sbin/chkconfig
-Requires(postun):	/usr/sbin/userdel
 Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Provides:	group(pks)
+Provides:	user(pks)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_localstatedir	/var/lib/pks
@@ -82,7 +85,7 @@ if [ -n "`/usr/bin/getgid pks`" ]; then
 		exit 1
 	fi
 else
-	/usr/sbin/groupadd -g 92 -r -f pks 1>&2
+	/usr/sbin/groupadd -g 92 pks 1>&2
 fi
 if [ -n "`/bin/id -u pks 2>/dev/null`" ]; then
 	if [ "`/bin/id -u pks`" != "92" ]; then
@@ -90,7 +93,7 @@ if [ -n "`/bin/id -u pks 2>/dev/null`" ]; then
 		exit 1
 	fi
 else
-	/usr/sbin/useradd -u 92 -M -o -r -d /var/lib/pks -s /bin/false -c "public key server system" -g pks pks 1>&2
+	/usr/sbin/useradd -u 92 -d /var/lib/pks -s /bin/false -c "public key server system" -g pks pks 1>&2
 fi
 
 %post
@@ -114,8 +117,8 @@ fi
 
 %postun
 if [ "$1" = "0" ]; then
-	/usr/sbin/userdel pks
-	/usr/sbin/groupdel pks
+	%userremove pks
+	%groupremove pks
 fi
 
 %files
