@@ -1,0 +1,52 @@
+Index: pgputil.c
+===================================================================
+RCS file: /afs/net.mit.edu/project/pks/.cvsroot/pks/pgputil.c,v
+retrieving revision 1.11
+retrieving revision 1.12
+diff -c -r1.11 -r1.12
+*** pgputil.c	1999/05/26 03:35:28	1.11
+--- pgputil.c	2000/05/20 06:13:43	1.12
+***************
+*** 1,4 ****
+! const char rcsid_pgputil_c[] = "$Id$";
+  
+  /* 
+   * Copyright (c) 1996, 1997, 1998, 1999, Marc Horowitz.  All rights reserved.
+--- 1,4 ----
+! const char rcsid_pgputil_c[] = "$Id$";
+  
+  /* 
+   * Copyright (c) 1996, 1997, 1998, 1999, Marc Horowitz.  All rights reserved.
+***************
+*** 352,357 ****
+--- 352,359 ----
+        if (!decode_num(data, 1, &mdtype))
+           return(0);
+  
++       keyid->size = 0;
++ 
+        if (!decode_subpacket(data, sig_time, keyid))
+           return(0);
+  
+***************
+*** 360,365 ****
+--- 362,380 ----
+  
+        if (!decode_bytestr(data, 2, &cksum))
+           return(0);
++ 
++       /* This is probably an x.509 signature.  Fill in a bogus keyid
++ 	 until I have a better way of dealing with this.  keyid is
++ 	 normally a pointer into another dynamically allocated bit of
++ 	 data, so making it a pointer to static data will work
++ 	 fine. */
++       if (keyid->size == 0) {
++ 	 static unsigned char boguskeyid[8] = { 0xff, 0xff, 0xff, 0xff, 
++ 					       0xff, 0xff, 0xff, 0xff };
++ 	 keyid->data = boguskeyid;
++ 	 keyid->size = sizeof(boguskeyid);
++ 	 keyid->offset = 0;
++       }
+  
+        switch (pkctype) {
+        case 1: /*RSA: 1*MPI*/
