@@ -88,6 +88,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/*
 %attr(754,root,root) /etc/rc.d/init.d/pks
 %{_mandir}/man*/*
-%attr(664,root,pks) %dir %{_localstatedir}
-%attr(644,pks,pks) %{_localstatedir}/*
+%attr(664,root,pks,755) %dir %{_localstatedir}
+%attr(644,pks,pks,755) %{_localstatedir}/*
 %config(noreplace) /etc/pksd.conf
