@@ -11,6 +11,8 @@ Source0:	http://www.mit.edu/people/marc/pks/%{name}-%{version}.tar.gz
 Source1:	%{name}.initd
 Patch0:		%{name}-read_only.patch
 URL:		http://www.mit.edu/people/marc/pks/
+BuildRequires:	autoconf
+BuildRequires:	automake
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Prereq:		/sbin/chkconfig
 
