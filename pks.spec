@@ -43,7 +43,7 @@ cd db2-sleepycat/dist/
 	aclocal
 	autoconf
 cd ../..
-aclocal
+%{__aclocal}
 %{__autoconf}
 %configure
 %{__make}
