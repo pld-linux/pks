@@ -1,4 +1,3 @@
-# TODO: fix+standardize useradd and groupadd
 Summary:	PKS - public key server system
 Summary(pl):	PKS - serwer kluczy publicznych
 Name:		pks
@@ -19,7 +18,13 @@ URL:		http://www.mit.edu/people/marc/pks/
 BuildRequires:	autoconf
 BuildRequires:	automake
 PreReq:		rc-scripts
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/bin/id
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
 Requires(post,preun):	/sbin/chkconfig
+Requires(postun):	/usr/sbin/userdel
+Requires(postun):	/usr/sbin/groupdel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_localstatedir	/var/lib/pks
@@ -71,13 +76,22 @@ install %{SOURCE2} $RPM_BUILD_ROOT%{_datadir}
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-grep -q pks /etc/group || (
-    /usr/sbin/groupadd -g 92 -r -f pks 1>&2 || :
-)
-grep -q pks /etc/passwd || (
-    /usr/sbin/useradd -M -o -r -u 92 \
-        -g pks -c "public key server system" -d /var/lib/pks pks 1>&2 || :
-)
+if [ -n "`/usr/bin/getgid pks`" ]; then
+	if [ "`/usr/bin/getgid pks`" != "92" ]; then
+		echo "Error: group pks doesn't have gid=92. Correct this before installing pks." 1>&2
+		exit 1
+	fi
+else
+	/usr/sbin/groupadd -g 92 -r -f pks 1>&2
+fi
+if [ -n "`/bin/id -u pks 2>/dev/null`" ]; then
+	if [ "`/bin/id -u pks`" != "92" ]; then
+		echo "Error: user pks doesn't have uid=92. Correct this before installing pks." 1>&2
+		exit 1
+	fi
+else
+	/usr/sbin/useradd -u 92 -M -o -r -d /var/lib/pks -s /bin/false -c "public key server system" -g pks pks 1>&2
+fi
 
 %post
 if [ "$1" = "1" ]; then
@@ -96,6 +110,12 @@ if [ "$1" = "0" ]; then
 	fi
 	/sbin/chkconfig --del pks
 	rm -f %{_datadir}/pks/errors
+fi
+
+%postun
+if [ "$1" = "0" ]; then
+	/usr/sbin/userdel pks
+	/usr/sbin/groupdel pks
 fi
 
 %files
