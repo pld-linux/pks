@@ -1,3 +1,4 @@
+# TODO: fix+standardize useradd and groupadd
 Summary:	PKS - public key server system
 Summary(pl):	PKS - serwer kluczy publicznych
 Name:		pks
@@ -17,8 +18,9 @@ Patch4:		%{name}-noinstall-db2.patch
 URL:		http://www.mit.edu/people/marc/pks/
 BuildRequires:	autoconf
 BuildRequires:	automake
+PreReq:		rc-scripts
+Requires(post,preun):	/sbin/chkconfig
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-Prereq:		/sbin/chkconfig
 
 %define		_localstatedir	/var/lib/pks
 %define		_datadir	%{_prefix}/share/pks
@@ -41,8 +43,8 @@ zarz±dzania i udostêpniania bazy danych kluczy publicznych PGP.
 
 %build
 cd db2-sleepycat/dist/
-	aclocal
-	autoconf
+	%{__aclocal}
+	%{__autoconf}
 cd ../..
 %{__aclocal}
 %{__autoconf}
@@ -63,7 +65,7 @@ install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 	localstatedir=$RPM_BUILD_ROOT%{_localstatedir}
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/pks
-install %{SOURCE2} $RPM_BUILD_ROOT/%{_datadir}
+install %{SOURCE2} $RPM_BUILD_ROOT%{_datadir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
