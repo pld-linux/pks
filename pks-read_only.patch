@@ -1,0 +1,162 @@
+
+	This patch adds "read_only" config option to the pksd.
+
+diff -durN pks-0.9.4.orig/mail_req.c pks-0.9.4/mail_req.c
+--- pks-0.9.4.orig/mail_req.c	Thu May 20 05:39:49 1999
++++ pks-0.9.4/mail_req.c	Mon Jul 10 15:41:33 2000
+@@ -314,6 +314,24 @@
+       unsigned char *incrmsg;
+       long incrlen;
+ 
++      if (conf->read_only) {
++	 if (!xbuffer_append_str(&reply_subject, ", read-only server"))
++	    log_fatal("mail_req",
++		      "failed reply_subject for read-only server");
++
++	 mail_send(conf->msc, 0, msg+hreply_to, hreply_to_len,
++		   reply_subject.buf, reply_subject.len,
++		   reply_headers.buf, reply_headers.len,
++		   textplain_str, textplain_len,
++		   NULL, 0,
++		   msc, c);
++
++         xbuffer_free(&reply_headers);
++	 xbuffer_free(&reply_subject);
++	 xbuffer_free(&oldxsentto);
++	 return;
++      }
++      
+       xbuffer_alloc(&incr_to);
+ 
+       if (pks_incr_have_syncsites(conf->pic)) {
+diff -durN pks-0.9.4.orig/mail_req.h pks-0.9.4/mail_req.h
+--- pks-0.9.4.orig/mail_req.h	Thu May 20 05:39:51 1999
++++ pks-0.9.4/mail_req.h	Mon Jul 10 15:42:02 2000
+@@ -16,6 +16,7 @@
+    pks_incr_conf *pic;
+    int max_last;
+    int max_reply_keys;
++   int read_only;
+ } mail_req_conf;
+ 
+ void mail_req(unsigned char *msg, long len, mail_req_conf *conf,
+diff -durN pks-0.9.4.orig/mkpksdconf.in pks-0.9.4/mkpksdconf.in
+--- pks-0.9.4.orig/mkpksdconf.in	Wed Jun  2 08:04:33 1999
++++ pks-0.9.4/mkpksdconf.in	Mon Jul 10 18:02:57 2000
+@@ -52,4 +52,6 @@
+ ### an index, verbose index, get, or since reply.  Setting it to -1
+ ### will allow any size reply.
+ # max_reply_keys -1
++### Set whis to 1 if you don't want anybody to update your server content.
++# read_only 1
+ EOF
+diff -durN pks-0.9.4.orig/pks_config.c pks-0.9.4/pks_config.c
+--- pks-0.9.4.orig/pks_config.c	Thu May 20 05:39:51 1999
++++ pks-0.9.4/pks_config.c	Mon Jul 10 15:42:19 2000
+@@ -32,6 +32,7 @@
+    { { 0, 0, NULL } },
+    -1,
+    -1,
++   0
+ };
+ 
+ const char db_dir_str[] = "db_dir";
+@@ -73,6 +74,9 @@
+ const char debug_str[] = "debug";
+ long debug_len = sizeof(debug_str)-1;
+ 
++const char read_only_str[] = "read_only";
++long read_only_len = sizeof(read_only_str)-1;
++
+ static int compare_strings(const void *e1, const void *e2)
+ {
+    return(my_strncasecmp((const char *) e1, (const char *) e2, -1));
+@@ -159,6 +163,7 @@
+ 	                pc->max_reply_keys))
+       else if (llist_conf(syncsite_str, syncsite_len, &(pc->syncsites)))
+       else if (num_conf(debug_str, debug_len, debug))
++      else if (num_conf(read_only_str, read_only_len, pc->read_only))
+    }
+ 
+    fclose(conf);
+diff -durN pks-0.9.4.orig/pks_config.h pks-0.9.4/pks_config.h
+--- pks-0.9.4.orig/pks_config.h	Thu May 20 05:39:52 1999
++++ pks-0.9.4/pks_config.h	Mon Jul 10 14:01:40 2000
+@@ -33,6 +33,8 @@
+    /* policy stuff */
+    int max_last;
+    int max_reply_keys;
++
++   int read_only;
+ } pks_config;
+ 
+ int pks_read_conf_file(const char *filename, pks_config *pc);
+diff -durN pks-0.9.4.orig/pks_www.c pks-0.9.4/pks_www.c
+--- pks-0.9.4.orig/pks_www.c	Wed Jun  2 08:06:01 1999
++++ pks-0.9.4/pks_www.c	Mon Jul 10 15:54:01 2000
+@@ -149,6 +149,9 @@
+ static const char bad_uri_str[] = "unknown uri in pks request";
+ static int bad_uri_len = sizeof(bad_uri_str)-1;
+ 
++static const char read_only_str[] = "This is read-only server";
++static int read_only_len = sizeof(read_only_str)-1;
++
+ int w_htmlify_index(xbuffer *out, unsigned char *in, long in_len)
+ {
+    long cnt, ptr, line, line_len, i, j, keyid, inref;
+@@ -428,6 +431,13 @@
+ 
+       if (bodylen == 0) {
+ 	 w_error_str(fd, vers, "pks request had no query string");
++	 return;
++      }
++
++      if (conf->read_only){
++         www_reply(fd, vers, 403, "Forbidden", (unsigned char *) read_only_str,
++		read_only_len);
++	 /*w_error_str(fd, vers, "read-only server");*/
+ 	 return;
+       }
+ 
+diff -durN pks-0.9.4.orig/pks_www.h pks-0.9.4/pks_www.h
+--- pks-0.9.4.orig/pks_www.h	Thu May 20 05:39:52 1999
++++ pks-0.9.4/pks_www.h	Mon Jul 10 15:33:55 2000
+@@ -14,6 +14,7 @@
+    int port;
+    int max_reply_keys;
+    pks_incr_conf *pic;
++   int read_only;
+ } pks_www_conf;
+ 
+ void pks_www_init(pks_www_conf *conf);
+diff -durN pks-0.9.4.orig/pksd.c pks-0.9.4/pksd.c
+--- pks-0.9.4.orig/pksd.c	Mon May 31 22:21:20 1999
++++ pks-0.9.4/pksd.c	Mon Jul 10 15:37:30 2000
+@@ -79,6 +79,7 @@
+    mrc.pic = &pic;
+    mrc.max_last = pc.max_last;
+    mrc.max_reply_keys = pc.max_reply_keys;
++   mrc.read_only = pc.read_only;
+ 
+    psc.socket = pc.socket_name;
+    psc.mrc = &mrc;
+@@ -86,6 +87,7 @@
+    pwc.port = pc.www_port;
+    pwc.max_reply_keys = pc.max_reply_keys;
+    pwc.pic = &pic;
++   pwc.read_only = pc.read_only;
+ 
+    if (!pc.www_port && (pc.mail_delivery_client[0] == '\0')) {
+       fprintf(stderr, "The configuration file did not specify any servers\n"
+diff -durN pks-0.9.4.orig/pksd.conf.5 pks-0.9.4/pksd.conf.5
+--- pks-0.9.4.orig/pksd.conf.5	Mon May 17 07:20:20 1999
++++ pks-0.9.4/pksd.conf.5	Mon Jul 10 18:01:29 2000
+@@ -95,6 +95,8 @@
+ This command gives the email address of a peer public key server to
+ this one.  This is the only command which can be specified more than
+ once.  It should be specified once for each peer server.
++.B read_only
++If set to nonzero the server will not allow to add keys via mail or http.
+ .SH FILES
+ pksd.conf
+ .SH SEE ALSO
