@@ -5,19 +5,18 @@ Release:	1
 License:	GPL
 Group:		Daemons
 Group(pl):	Serwery
-Source0:	http://www.mit.edu/people/marc/pks/pks-0.9.4.tar.gz
-Source1:	pks.initd
-Patch0:		pks-read_only.patch
+Source0:	http://www.mit.edu/people/marc/pks/%{name}-%{version}.tar.gz
+Source1:	%{name}.initd
+Patch0:		%{name}-read_only.patch
 URL:		http://www.mit.edu/people/marc/pks/
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define _localstatedir /var/lib/pks
-%define _datadir %{_prefix}/share/pks
+%define		_localstatedir	/var/lib/pks
+%define		_datadir	%{_prefix}/share/pks
 
 %description
-The  public  key  server system is a set of programs which
-manages and provides general access to a database  of  PGP
-public keys.
+The public key server system is a set of programs which manages and
+provides general access to a database of PGP public keys.
 
 %prep
 %setup -q
@@ -71,7 +70,7 @@ else
 fi
 
 %preun
-if [ "$1" = 0 ]; then
+if [ "$1" = "0" ]; then
 	if [ -f /var/lock/sybsys/pks ]; then
 		/etc/rc.d/init.d/pks stop >&2
 	fi
@@ -90,4 +89,4 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man*/*
 %attr(664,root,pks,755) %dir %{_localstatedir}
 %attr(644,pks,pks,755) %{_localstatedir}/*
-%config(noreplace) /etc/pksd.conf
+%config(noreplace) %{_sysconfdir}/pksd.conf
