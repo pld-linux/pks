@@ -77,8 +77,6 @@ grep -q pks /etc/passwd || (
 )
 
 %post
-[ -f /var/lib/pks/db/num_keydb ] || su pks -c "/usr/bin/pksclient /var/lib/pks/db create >& /dev/null"
-
 if [ "$1" = "1" ]; then
 	/sbin/chkconfig --add pks
 	echo "Run \"/etc/rc.d/init.d/pks start\" to start pks." >&2
