@@ -6,7 +6,7 @@ Release:	3
 License:	GPL
 Group:		Daemons
 Source0:	http://www.mit.edu/people/marc/pks/%{name}-%{version}.tar.gz
-Source1:	%{name}.initd
+Source1:	%{name}.init
 Patch0:		%{name}-read_only.patch
 URL:		http://www.mit.edu/people/marc/pks/
 BuildRequires:	autoconf
