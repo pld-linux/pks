@@ -61,9 +61,6 @@ install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 	datadir=$RPM_BUILD_ROOT%{_datadir} \
 	localstatedir=$RPM_BUILD_ROOT%{_localstatedir}
 
-# we don't need this
-rm -f $RPM_BUILD_ROOT/%{_bindir}/db_*
-
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/pks
 install %{SOURCE2} $RPM_BUILD_ROOT/%{_datadir}
 
