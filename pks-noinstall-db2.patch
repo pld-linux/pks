@@ -1,0 +1,12 @@
+diff -Nru pks-0.9.4.orig/Makefile.in pks-0.9.4/Makefile.in
+--- pks-0.9.4.orig/Makefile.in	Wed Jun  2 08:31:19 1999
++++ pks-0.9.4/Makefile.in	Fri Jun 14 15:19:43 2002
+@@ -12,7 +12,7 @@
+ 
+ SUBDIRS = db2-sleepycat/dist
+ 
+-depend all install check clean distclean maintainer-clean::
++depend all check clean distclean maintainer-clean::
+ 	for i in ${SUBDIRS}; do (test -d $$i && cd $$i && ${MAKE} $@) || exit 1; done
+ 
+ ## this builds the keyserver
