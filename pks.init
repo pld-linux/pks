@@ -16,13 +16,14 @@
 case "$1" in
   start)
 	if [ ! -f /var/lib/pks/db/num_keydb ]; then
-		echo "pks database not initialized. Try \"$0 init\" before start."
+		nls "pks database not initialized. Try \"%s init\" before start." "$0"
 		exit 1
 	fi
 	
 	# Check if service is already running?
 	if [ -f /var/lock/subsys/pks ]; then
 		msg_already_running pks
+		exit 1
 	else
 		msg_starting pks
 		busy
@@ -60,7 +61,7 @@ case "$1" in
 	;;
   init)
 	if [ -f /var/lib/pks/db/num_keydb ]; then
-		echo "Seems that database is initialized now."
+		nls "Seems that database is initialized now."
 		exit 1
 	fi
 	
@@ -73,7 +74,7 @@ case "$1" in
 	exit 1
 	;;
   *)
-	msg_Usage "$0 {start|stop|status|restart|reload|init}"
+	msg_Usage "$0 {start|stop|init|restart|reload|status}"
 	exit 1
 	;;
 esac
