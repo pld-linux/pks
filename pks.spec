@@ -23,7 +23,6 @@ provides general access to a database of PGP public keys.
 %patch0 -p1
 
 %build
-LDFLAGS="-s"; export LDFLAGS
 %configure
 %{__make}
 
@@ -45,8 +44,7 @@ rm -f $RPM_BUILD_ROOT/%{_bindir}/db_*
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/pks
 
-gzip -9nf README NEWS \
-	$RPM_BUILD_ROOT%{_mandir}/man*/*
+gzip -9nf README NEWS
 
 %pre
 grep -q pks /etc/group || (
