@@ -47,22 +47,34 @@ install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/pks
 gzip -9nf README NEWS
 
 %pre
-GID=92; %groupadd
-UID=92; HOMEDIR=/var/lib/pks; COMMENT="public key server system"; %useradd
+grep -q pks /etc/group || (
+    /usr/sbin/groupadd -g 92 -r -f pks 1>&2 || :
+)
+grep -q pks /etc/passwd || (
+    /usr/sbin/useradd -M -o -r -u 92 \
+        -g pks -c "public key server system" -d /var/lib/pks pks 1>&2 || :
+)
 
 %post
 [ -f /var/lib/pks/db/num_keydb ] || /usr/bin/pksclient /var/lib/pks/db create
-%chkconfig_add
 
-%preun
-%chkconfig_del
-if [ "$1" = "0" ]; then
-	rm -f %{_datadir}/pks/errors
+if [ "$1" = "1" ]; then
+	/sbin/chkconfig --add pks
+	echo "Run \"/etc/rc.d/init.d/pks start\" to start pks." >&2
+else
+	if [ -f /var/lock/subsys/pks ]; then
+		/etc/rc.d/init.d/pks restart >&2
+	fi
 fi
 
-%postun
-%groupdel
-%userdel
+%preun
+if [ "$1" = "0" ]; then
+	if [ -f /var/lock/sybsys/pks ]; then
+		/etc/rc.d/init.d/pks stop >&2
+	fi
+	/sbin/chkconfig --del pks
+	rm -f %{_datadir}/pks/errors
+fi
 
 %clean
 rm -rf $RPM_BUILD_ROOT
