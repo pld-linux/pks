@@ -6,6 +6,7 @@ Release:	4
 License:	GPL
 Group:		Daemons
 Source0:	http://www.mit.edu/people/marc/pks/%{name}-%{version}.tar.gz
+# Source0-md5:	365d062bbc3f7bfda745474693d0fdec
 Source1:	%{name}.init
 Source2:	pks_help.en
 Patch0:		%{name}-read_only.patch
