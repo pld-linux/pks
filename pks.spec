@@ -2,7 +2,7 @@ Summary:	PKS - public key server system
 Summary(pl):	PKS - serwer kluczy publicznych
 Name:		pks
 Version:	0.9.4
-Release:	2
+Release:	3
 License:	GPL
 Group:		Daemons
 Group(de):	Server
@@ -30,6 +30,12 @@ zarz±dzania i udostêpniania bazy danych kluczy publicznych PGP.
 %patch0 -p1
 
 %build
+cd db2-sleepycat/dist/
+	aclocal
+	autoconf
+cd ../..
+aclocal
+autoconf
 %configure
 %{__make}
 
