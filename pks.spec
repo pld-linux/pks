@@ -90,7 +90,7 @@ fi
 
 %preun
 if [ "$1" = "0" ]; then
-	if [ -f /var/lock/sybsys/pks ]; then
+	if [ -f /var/lock/subsys/pks ]; then
 		/etc/rc.d/init.d/pks stop >&2
 	fi
 	/sbin/chkconfig --del pks
