@@ -1,14 +1,13 @@
 #!/bin/sh
 #
-# pks:       Starts the PGP Key Server
+# pks		Starts the PGP Key Server
 #
-# Version:      @(#) /etc/rc.d/init.d/pks 1.0
+# chkconfig:	345 90 10
 #
-# chkconfig: 345 90 10
-# description: Starts and stops the Public Key Server System at boot time and shutdown.
+# description:	Starts and stops the Public Key Server System at boot time and shutdown.
 #
-# processname: pksd
-# config: /etc/pksd.conf
+# processname:	pksd
+# config:	/etc/pksd.conf
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -16,30 +15,67 @@
 # See how we were called.
 case "$1" in
   start)
-	msg_starting pksd
-	busy
-	su pks -c "pksd /etc/pksd.conf &"
-	deltext
-	ok
-	touch /var/lock/subsys/pks
+	if [ ! -f /var/lib/pks/db/num_keydb ]; then
+		echo "pks database not initialized. Try \"$0 init\" before start."
+		exit 1
+	fi
+	
+	# Check if service is already running?
+	if [ -f /var/lock/subsys/pks ]; then
+		msg_already_running pks
+	else
+		msg_starting pks
+		busy
+		
+		su pks -c "pksd /etc/pksd.conf &"
+		deltext
+		
+		if ps -C pksd >/dev/null 2>&1; then
+			RETVAL=0
+			ok
+		else
+			RETVAL=1
+			fail
+		fi
+		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/pks
+	fi
 	;;
   stop)
-	msg_stopping pksd
-	killproc pksd
-	rm -f /var/lock/subsys/pks
+	if [ -f /var/lock/subsys/pks ]; then
+		msg_stopping pksd
+		killproc pksd
+		rm -f /var/lock/subsys/pks
+	else
+		msg_not_running pks
+		exit 1
+	fi
 	;;
   status)
 	status pksd
+	exit $?
 	;;
   restart)
 	$0 stop
 	$0 start
 	;;
+  init)
+	if [ -f /var/lib/pks/db/num_keydb ]; then
+		echo "Seems that database is initialized now."
+		exit 1
+	fi
+	
+	show "Initializing database for pks"
+	busy
+	
+	su pks -c "/usr/bin/pksclient /var/lib/pks/db create >& /dev/null"
+	
+	ok
+	exit 1
+	;;
   *)
-	msg_Usage "$0 {start|stop|status|restart}"
+	msg_Usage "$0 {start|stop|status|restart|reload|init}"
 	exit 1
 	;;
 esac
 
-exit 0
-
+exit $RETVAL
