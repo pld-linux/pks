@@ -12,6 +12,7 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
+
 # See how we were called.
 case "$1" in
   start)
@@ -74,7 +75,7 @@ case "$1" in
 	exit 1
 	;;
   *)
-	msg_Usage "$0 {start|stop|init|restart|reload|status}"
+	msg_usage "$0 {start|stop|init|restart|reload|status}"
 	exit 1
 	;;
 esac
