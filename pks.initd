@@ -18,7 +18,7 @@ case "$1" in
   start)
 	msg_starting pksd
 	busy
-	pksd /etc/pksd.conf &
+	su pks -c "pksd /etc/pksd.conf &"
 	deltext
 	ok
 	touch /var/lock/subsys/pks
