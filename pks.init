@@ -12,34 +12,29 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-
+RETVAL=0
 # See how we were called.
 case "$1" in
   start)
 	if [ ! -f /var/lib/pks/db/num_keydb ]; then
 		nls "pks database not initialized. Try \"%s init\" before start." "$0"
-		exit 1
+		exit 6
 	fi
-	
+
 	# Check if service is already running?
-	if [ -f /var/lock/subsys/pks ]; then
-		msg_already_running pks
-		exit 1
-	else
+	if [ ! -f /var/lock/subsys/pks ]; then
 		msg_starting pks
 		busy
-		
 		su pks -c "pksd /etc/pksd.conf &"
-		deltext
-		
 		if ps -C pksd >/dev/null 2>&1; then
-			RETVAL=0
 			ok
 		else
 			RETVAL=1
 			fail
 		fi
 		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/pks
+	else
+		msg_already_running pks
 	fi
 	;;
   stop)
@@ -49,35 +44,34 @@ case "$1" in
 		rm -f /var/lock/subsys/pks
 	else
 		msg_not_running pks
-		exit 1
 	fi
 	;;
   status)
 	status pksd
 	exit $?
 	;;
-  restart)
+  restart|force-reload)
 	$0 stop
 	$0 start
+	exit $?
 	;;
   init)
 	if [ -f /var/lib/pks/db/num_keydb ]; then
 		nls "Seems that database is initialized now."
 		exit 1
 	fi
-	
+
 	show "Initializing database for pks"
 	busy
-	
+
 	su pks -c "/usr/bin/pksclient /var/lib/pks/db create >& /dev/null"
-	
+
 	ok
 	exit 1
 	;;
   *)
-	msg_usage "$0 {start|stop|init|restart|reload|status}"
-	exit 1
-	;;
+	msg_usage "$0 {start|stop|init|restart|reload|force-reload|status}"
+	exit 3
 esac
 
 exit $RETVAL
