@@ -1,15 +1,18 @@
 Summary:	PKS - public key server system
+Summary(pl):	PKS - serwer kluczy publicznych
 Name:		pks
 Version:	0.9.4
-Release:	1
+Release:	2
 License:	GPL
 Group:		Daemons
+Group(de):	Server
 Group(pl):	Serwery
 Source0:	http://www.mit.edu/people/marc/pks/%{name}-%{version}.tar.gz
 Source1:	%{name}.initd
 Patch0:		%{name}-read_only.patch
 URL:		http://www.mit.edu/people/marc/pks/
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+Prereq:		/sbin/chkconfig
 
 %define		_localstatedir	/var/lib/pks
 %define		_datadir	%{_prefix}/share/pks
@@ -17,6 +20,10 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 The public key server system is a set of programs which manages and
 provides general access to a database of PGP public keys.
+
+%description -l pl
+System serwera kluczy publicznych zawiera zestaw programów do
+zarz±dzania i udostêpniania bazy danych kluczy publicznych PGP.
 
 %prep
 %setup -q
@@ -45,6 +52,9 @@ rm -f $RPM_BUILD_ROOT/%{_bindir}/db_*
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/pks
 
 gzip -9nf README NEWS
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 %pre
 grep -q pks /etc/group || (
@@ -75,9 +85,6 @@ if [ "$1" = "0" ]; then
 	/sbin/chkconfig --del pks
 	rm -f %{_datadir}/pks/errors
 fi
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
