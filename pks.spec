@@ -17,7 +17,7 @@ Patch4:		%{name}-noinstall-db2.patch
 URL:		http://www.mit.edu/people/marc/pks/
 BuildRequires:	autoconf
 BuildRequires:	automake
-BuildRequires:	rpmbuild(macros) >= 1.159
+BuildRequires:	rpmbuild(macros) >= 1.202
 PreReq:		rc-scripts
 Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
@@ -79,22 +79,8 @@ install %{SOURCE2} $RPM_BUILD_ROOT%{_datadir}
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-if [ -n "`/usr/bin/getgid pks`" ]; then
-	if [ "`/usr/bin/getgid pks`" != "92" ]; then
-		echo "Error: group pks doesn't have gid=92. Correct this before installing pks." 1>&2
-		exit 1
-	fi
-else
-	/usr/sbin/groupadd -g 92 pks 1>&2
-fi
-if [ -n "`/bin/id -u pks 2>/dev/null`" ]; then
-	if [ "`/bin/id -u pks`" != "92" ]; then
-		echo "Error: user pks doesn't have uid=92. Correct this before installing pks." 1>&2
-		exit 1
-	fi
-else
-	/usr/sbin/useradd -u 92 -d /var/lib/pks -s /bin/false -c "public key server system" -g pks pks 1>&2
-fi
+%groupadd -g 92 pks
+%useradd -u 92 -d /var/lib/pks -s /bin/false -c "public key server system" -g pks pks
 
 %post
 if [ "$1" = "1" ]; then
