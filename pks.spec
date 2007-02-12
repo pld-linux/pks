@@ -1,5 +1,5 @@
 Summary:	PKS - public key server system
-Summary(pl):	PKS - serwer kluczy publicznych
+Summary(pl.UTF-8):   PKS - serwer kluczy publicznych
 Name:		pks
 Version:	0.9.4
 Release:	4
@@ -37,9 +37,9 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 The public key server system is a set of programs which manages and
 provides general access to a database of PGP public keys.
 
-%description -l pl
-System serwera kluczy publicznych zawiera zestaw programów do
-zarz±dzania i udostêpniania bazy danych kluczy publicznych PGP.
+%description -l pl.UTF-8
+System serwera kluczy publicznych zawiera zestaw programÃ³w do
+zarzÄ…dzania i udostÄ™pniania bazy danych kluczy publicznych PGP.
 
 %prep
 %setup -q
