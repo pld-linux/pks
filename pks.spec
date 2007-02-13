@@ -1,5 +1,5 @@
 Summary:	PKS - public key server system
-Summary(pl.UTF-8):   PKS - serwer kluczy publicznych
+Summary(pl.UTF-8):	PKS - serwer kluczy publicznych
 Name:		pks
 Version:	0.9.4
 Release:	4
