@@ -18,7 +18,7 @@ URL:		http://www.mit.edu/people/marc/pks/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	rpmbuild(macros) >= 1.202
-PreReq:		rc-scripts
+Requires:	rc-scripts
 Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
@@ -117,4 +117,4 @@ fi
 %attr(775,root,pks) %dir %{_localstatedir}
 %attr(775,root,pks) %dir %{_localstatedir}/db
 %attr(775,root,pks) %dir %{_localstatedir}/incoming
-%config(noreplace) %{_sysconfdir}/pksd.conf
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/pksd.conf
